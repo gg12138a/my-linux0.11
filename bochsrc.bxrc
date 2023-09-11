@@ -31,6 +31,8 @@ panic: action=ask
 log: bochs.log
 debugger_log: bochsdbg.log
 
+debug_symbols: file=system.sym
+
 # Display options
 display_library: x, options="gui_debug"
 

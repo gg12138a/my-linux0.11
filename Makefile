@@ -43,12 +43,6 @@ boot/head.o:
 init/main.o:
 	(cd init; make main.o)
 
-.PHONY: clean
-clean:
-	rm -f system.map system.o system.bin disk.img bochs.log bochsdbg.log
-	(cd boot; make clean;)
-	(cd init; make clean;)
-
 .PHONY: run
 run: disk.img
 	qemu-system-i386 -fda disk.img
@@ -61,10 +55,20 @@ gdb-server: disk.img
 gdb-client: disk.img system.o
 	gdb   -ex 'set arch i80386' -ex 'target remote localhost:1234' -ex 'file system.o'
 
+system.sym: system.o
+	nm system.o | sort | sed 's/\ A\ /\ /g' > system.sym
+
 .PHONY: bochs-run
-bochs-run: disk.img
+bochs-run: disk.img system.sym
+# bochs-2.7
 	bochs -f bochsrc.bxrc -q
 
 build-dev-env:
 	pacman -S bin86
 	paru -S nasm
+
+.PHONY: clean
+clean:
+	rm -f system.map system.o system.bin disk.img bochs.log bochsdbg.log system.sym
+	(cd boot; make clean;)
+	(cd init; make clean;)
