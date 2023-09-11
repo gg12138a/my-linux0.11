@@ -5,7 +5,7 @@ AS 		=as --32 -march=i386+387 -mtune=i386 -nostdlib
 LD		=ld
 
 LDFLAGS	=-s -x -M -m elf_i386 -nostdlib
-CFLAGS	=-m32 -march=i386+387 -mtune=i386 \
+CFLAGS	= -c -m32 -march=i386 -mtune=i386 \
 	-nostdinc -nostdlib -nostartfiles -nodefaultlibs \
 	-ffreestanding -fno-stack-protector -fno-exceptions
 
@@ -22,7 +22,7 @@ boot/setup.bin:
 
 # 后续磁盘块
 system-bin: boot/head.o init/main.o
-	$(LD) $(LDFLAGS) -o $@ $< > system-map
+	$(LD) $(LDFLAGS) -o $@ $< > system.map
 
 # 整个磁盘文件
 disk-img: system-bin boot/bootsect.bin boot/setup.bin
@@ -38,6 +38,7 @@ init/main.o:
 
 .PHONY: clean
 clean:
+	rm -f system.map
 	(cd boot; make clean;)
 	(cd init; make clean;)
 

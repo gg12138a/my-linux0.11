@@ -1,6 +1,6 @@
 CC		=gcc
 
-CFLAGS	= -m32 -march=i386+387 -mtune=i386 \
+CFLAGS	= -c -m32 -march=i386 -mtune=i386 \
 	-nostdinc -nostdlib -nostartfiles -nodefaultlibs \
 	-ffreestanding -fno-stack-protector -fno-exceptions
 
