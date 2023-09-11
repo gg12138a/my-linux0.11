@@ -1,23 +1,35 @@
-AS86	=as86 -0 -a		# 输出16位目标文件，并输出调试信息
+#AS86	=as86 -0 -a		# 输出16位目标文件，并输出调试信息
 LD86	=ld86 -0
 
 AS 		=as --32 -march=i386+387 -mtune=i386 -nostdlib
 
-bootsect.o: bootsect.s
-	$(AS86) -o $@ $<
+bootsect.o: bootsect.asm
+	nasm -o $@ -g -f elf32 $<
 
-bootsect.bin: bootsect.o
-	$(LD86) -s -o $@ $<
+setup.o: setup.asm
+	nasm -o $@ -g -f elf32 $<
 
-setup.o: setup.s
-	$(AS86) -o $@ $<
+bootsect.bin: bootsect.asm
+	nasm -o $@ $<
 
-setup.bin: setup.o
-	$(LD86) -s -o $@ $<
+setup.bin: setup.asm
+	nasm -s -o $@ $<
 
 head.o:	head.s
 	$(AS) -o $@ $<
 
 .PHONY: clean
 clean:
-	rm -f bootsect.o bootsect.bin setup.o setup.bin head.o
+	rm -f \
+ 		bootsect.bin setup.bin \
+ 		bootsect.o setup.o head.o \
+		bootsect.disasm setup.disasm
+
+.PHONY: disasm
+disasm: bootsect.disasm	setup.disasm
+
+bootsect.disasm: bootsect.bin
+	ndisasm -b 16 $< > $@
+
+setup.disasm: setup.bin
+	ndisasm -b 16 $< > $@

@@ -5,12 +5,12 @@ AS 		=as --32 -march=i386+387 -mtune=i386 -nostdlib
 LD		=ld
 
 LDFLAGS	=-s -x -M -m elf_i386 -nostdlib
-CFLAGS	= -c -m32 -march=i386 -mtune=i386 \
+CFLAGS	=-c -O2 -m32 -march=i386 -mtune=i386 \
 	-nostdinc -nostdlib -nostartfiles -nodefaultlibs \
 	-ffreestanding -fno-stack-protector -fno-exceptions
 
 .PHONY: all
-all: disk-img
+all: disk.img
 
 # 512B的MBR
 boot/bootsect.bin:
@@ -20,14 +20,19 @@ boot/bootsect.bin:
 boot/setup.bin:
 	(cd boot; make setup.bin)
 
+init/to_compile.o:
+	(cd init; make to_compile.o)
+
+system.o: boot/head.o init/main.o init/to_compile.o
+	$(LD) $(LDFLAGS) -r -o $@ $^
+
 # 后续磁盘块
-system-bin: boot/head.o init/main.o
-	$(LD) $(LDFLAGS) -o $@ $< > system.map
+system.bin: system.o
+	$(LD) $(LDFLAGS) -o $@ $^ > system.map
 
 # 整个磁盘文件
-disk-img: system-bin boot/bootsect.bin boot/setup.bin
-	# 把这些拷贝到一个文件中
-	dd if=/dev/urandom of=disk-img bs=1M count=1
+disk.img: system.bin boot/bootsect.bin boot/setup.bin
+	python3 ./combine.py
 
 
 boot/head.o:
@@ -38,7 +43,20 @@ init/main.o:
 
 .PHONY: clean
 clean:
-	rm -f system.map
+	rm -f system.map system.o system.bin disk.img
 	(cd boot; make clean;)
 	(cd init; make clean;)
 
+.PHONY: run
+run: disk.img
+	qemu-system-i386 -fda disk.img
+
+.PHONY: gdb-server
+gdb-server: disk.img
+# qemu-img create -f raw disk.img 1.44M
+# dd if=bootsector.bin of=disk.img bs=512 count=1 conv=notrunc
+	qemu-system-i386 -m 16m -boot a -fda disk.img -S -s
+
+.PHONY: gdb-client
+gdb-client: disk-img system.o
+	gdb   -ex 'set arch i80386' -ex 'target remote localhost:1234' -ex 'file system.o'
