@@ -4,7 +4,7 @@
 ; iself out of the way to address 0x90000, and jumps there.
 ;
 ; It then loads 'setup' directly after itself (0x90200), and the system
-; at 0x10000, using BIOS interrupts. 
+; at 0x10000, using BIOS interrupts.
 
 .globl begtext, begdata, begbss, endtext, enddata, endbss
 .text
@@ -28,7 +28,7 @@ ROOT_DEV = 0x306                ; 指定根文件系统设备是第2个硬盘的
 entry start
 start:
   ; BIOS will load this boot sector to memory address `0x7c00`.
-  ; then execute instruction jmp 0:0x7c00. 
+  ; then execute instruction jmp 0:0x7c00.
   ; so, cs register will be 0, ip reg will be 0x7c00.
   mov ax, #BOOT_SEG
   mov ds, ax
@@ -43,7 +43,7 @@ start:
   movw                  ; copy `ds:si` to `es:di`.
 
   ; jump to 'INIT_SEG:go'(0x9000:go), so cs=0x9000, ip=go.
-  jmpi go, INIT_SEG 
+  jmpi go, INIT_SEG
 
 go:
   ; init memory layout.
@@ -54,7 +54,7 @@ go:
 	mov	sp, #0xFF00       ; arbitrary value >>512. so stack top was put to `0x9FF00`
 
 load_setup:
-  ; load 4 sectors to addr `0x90200`, 
+  ; load 4 sectors to addr `0x90200`,
   ; from the second sector in drive 0, head 0, track 0, sector 2.
 	mov	dx, #0x0000		          ; drive 0, head 0
 	mov	cx, #0x0002		          ; sector 2, track 0
@@ -64,7 +64,7 @@ load_setup:
 	jnc	ok_load_setup		        ; ok - continue
 	; 如果读出错，则复位驱动器，并重试
 	mov	dx, #0x0000
-	mov	ax, #0x0000		    
+	mov	ax, #0x0000
 	int	0x13                    ; reset the diskette
 	j	load_setup
 
@@ -75,11 +75,11 @@ ok_load_setup:
   int 0x13
   mov	ch, #0x00
   ; copy returned params
-  ; seg cs                    ; 段超越，即设置下一条指令的基址寄存器
-  mov cs:sectors, cx          ; save sectors_per_track
+  seg cs                    ; 段超越，即设置下一条指令的基址寄存器
+  mov sectors, cx          ; save sectors_per_track
   mov ax, #INIT_SEG
   mov es, ax                  ; reset es(updated when interrupt return)
-  
+
   ; print some msg
   mov ah, #0x03
   xor bh, bh
@@ -97,17 +97,17 @@ ok_load_setup:
   call read_it
   call kill_motor
 
-  
+
   ; check which root-device to use.
   ; if the device is defined (!= 0), nothing is done and the given device is used.
   ; Otherwise, either /dev/PS0 (2,28) or /dev/at0 (2,8), depending on the number of sectors that the BIOS reports currently.
-	
-  ; seg cs
-	mov	ax, cs:root_dev
+
+    seg cs
+	mov	ax, root_dev
 	cmp	ax, #0
 	jne	root_defined  ; 如果 ax != 0, 转到root_defined
-	; seg cs
-	mov	bx, cs:sectors
+	seg cs
+	mov	bx, sectors
   ; 取上面保存的每磁道扇区数;
   ; 如果sectors=15, 则说明是1.2Mb的驱动器;
   ; 如果sectors=18, 则说明是1.44Mb软驱;
@@ -121,8 +121,8 @@ ok_load_setup:
 undef_root:
 	jmp undef_root    ; 如果都不一样，则死循环（死机）
 root_defined:
-	; seg cs
-	mov	cs:root_dev, ax  ; update root_dev
+	seg cs
+	mov	root_dev, ax  ; update root_dev
 
   ; after that (everyting loaded), we jump to
   ; the setup-routine loaded directly after
@@ -139,7 +139,7 @@ root_defined:
 ;
 sread:  .word 1+SETUP_LEN   ; sectors read in current track
 head:   .word 0             ; current head
-track:  .word 0             : current track
+track:  .word 0             ; current track
 
 read_it:
   mov ax, es
@@ -158,8 +158,8 @@ ok1_read:
   ; 根据当前磁道还未读取的扇区数以及段内数据字节开始偏移位置，计算如果全部读取这些
   ; 未读扇区,所读总字节数是否会超过64KB段长度的限制。若会超过,则根据此次最多能读
   ; 入的字节数(64KB - 段内偏移位置), 反算出此次需要读取的扇区数。
-  ; seg cs
-  mov ax, cs:sectors
+  seg cs
+  mov ax, sectors
   sub ax, sread           ; 减去当前磁道已读扇区数
   mov cx, ax
   shl cx, #9
@@ -170,14 +170,14 @@ ok1_read:
   sub ax, bx
   shr ax, #9              ; 若加上此次将读磁道上所有未读扇区时会超过64KB,
                           ; 则计算此时最多能读入的字节数(64KB - 段内读偏移位置),
-                          ; 再转换成需要读取的扇区数。              
+                          ; 再转换成需要读取的扇区数。
 
 ok2_read:
 	call read_track
 	mov cx, ax              ; dx = 该此操作已读取的扇区数
 	add ax, sread           ; 当前磁道上已经读取的扇区数
-	; seg cs
-	cmp ax, cs:sectors      ; 如果当前磁道上的还有扇区未读,则跳转到ok3_read处
+	seg cs
+	cmp ax, sectors      ; 如果当前磁道上的还有扇区未读,则跳转到ok3_read处
 	jne ok3_read            ; 读该磁道的下一磁头面(1号磁头)上的数据. 如果已经完成,则去读下一磁道
 	mov ax, #1
 	sub ax, head            ; 判断当前磁头号
@@ -194,7 +194,7 @@ ok3_read:
 	jnc rp_read			        ; 若小于64KB边界值, 则跳转到rp_read处, 继续读数据;
 						              ; 否则调整当前段，为读下一段数据作准备
 	mov ax,es
-	add ax,1000h		        ; 将段基址调整为指向下一个64KB段内存
+	add ax,0x1000		        ; 将段基址调整为指向下一个64KB段内存
 	mov es,ax
 	xor bx,bx
 	jmp rp_read
@@ -217,7 +217,7 @@ read_track:
 	mov dl, #0			  ; dl = 驱动器号(为0表示当前驱动器)
 	and dx, 0x0100		; 磁头号不大于1
 	mov ah, #2			  ; ah = 2, 读磁盘扇区功能号
-	int 13h
+	int 0x13
 	jc bad_rt			    ; 若出错,则跳转至bad_rt
 	pop dx
 	pop cx
@@ -226,7 +226,7 @@ read_track:
 	ret
 
 ; 执行驱动器复位操作(磁盘中断功能号0), 再跳转到read_track处重试
-bad_rt:	
+bad_rt:
 	mov ax, #0
 	mov dx, #0
 	int 0x13
@@ -237,12 +237,11 @@ bad_rt:
 	jmp read_track
 
 
-/*
- * 关闭软驱的马达, 从而以已知状态进入内核。
- * This procedure turns off the floppy drive motor, so
- * that we enter the kernel in a known state, and
- * don't have to worry about it later.
- */
+; 关闭软驱的马达, 从而以已知状态进入内核。
+; This procedure turns off the floppy drive motor, so
+; that we enter the kernel in a known state, and
+; don't have to worry about it later.
+;
 kill_motor:
 	push dx
 	mov dx,#0x3f2   ; 软驱控制卡的驱动端口, 只写
