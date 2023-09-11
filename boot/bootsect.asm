@@ -129,6 +129,7 @@ root_defined:
 ; the setup-routine loaded directly after
 ; the bootblock:
 
+togo:
 	jmp	SETUPSEG:0
 
 ; This routine loads the system at address 0x10000, making sure

@@ -45,7 +45,7 @@ init/main.o:
 
 .PHONY: clean
 clean:
-	rm -f system.map system.o system.bin disk.img
+	rm -f system.map system.o system.bin disk.img bochs.log bochsdbg.log
 	(cd boot; make clean;)
 	(cd init; make clean;)
 
@@ -60,3 +60,11 @@ gdb-server: disk.img
 .PHONY: gdb-client
 gdb-client: disk.img system.o
 	gdb   -ex 'set arch i80386' -ex 'target remote localhost:1234' -ex 'file system.o'
+
+.PHONY: bochs-run
+bochs-run: disk.img
+	bochs -f bochsrc.bxrc -q
+
+build-dev-env:
+	pacman -S bin86
+	paru -S nasm

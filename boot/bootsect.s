@@ -51,7 +51,7 @@ go:
   mov ds, ax
   mov es, ax
   mov ss, ax
-	mov	sp, #0xFF00       ; arbitrary value >>512. so stack top was put to `0x9FF00`
+  mov sp, #0xFF00       ; arbitrary value >>512. so stack top was put to `0x9FF00`
 
 load_setup:
   ; load 4 sectors to addr `0x90200`,

@@ -1,0 +1,38 @@
+###############################################################
+# bochsrc.bxrc file for Tinix.
+###############################################################
+
+# how much memory the emulated machine will have
+megs: 32
+romimage: file=/home/gxy/software/bochs-2.7-build/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/home/gxy/software/bochs-2.7-build/share/bochs/VGABIOS-elpin-2.40
+
+# 配置软盘驱动器
+floppya: 1_44=disk.img, status=inserted
+
+# 设置启动顺序
+boot: floppy
+
+# disable the mouse, since Tinix is text only
+mouse: enabled=0
+
+# enable key mapping, using US layout as default.
+keyboard: keymap=/home/gxy/software/bochs-2.7-build/share/bochs/keymaps/x11-pc-us.map
+
+# where do we send log messages?
+log: bochsout.txt
+
+
+# Debugging options
+debug: action=ignore, pci=report
+info: action=report
+error: action=report
+panic: action=ask
+log: bochs.log
+debugger_log: bochsdbg.log
+
+# Display options
+display_library: x, options="gui_debug"
+
+# Bochs internal debugger
+magic_break: enabled=1
