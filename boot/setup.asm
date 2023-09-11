@@ -18,6 +18,7 @@ INITSEG  equ 0x9000	; we move boot here - out of the way
 SYSSEG   equ 0x1000	; system loaded at 0x10000 (65536).
 SETUPSEG equ 0x9020	; this is the current segment
 
+section .code
 start:
 
 ; ok, the read went well so we get current cursor position and save it for

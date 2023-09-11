@@ -4,16 +4,16 @@ LD86	=ld86 -0
 AS 		=as --32 -march=i386+387 -mtune=i386 -nostdlib
 
 bootsect.o: bootsect.asm
-	nasm -o $@ -g -f elf32 $<
+	nasm -o $@ -g -f elf32 -F stabs $<
 
 setup.o: setup.asm
-	nasm -o $@ -g -f elf32 $<
+	nasm -o $@ -g -f elf32 -F stabs $<
 
 bootsect.bin: bootsect.asm
 	nasm -o $@ $<
 
 setup.bin: setup.asm
-	nasm -s -o $@ $<
+	nasm -o $@ $<
 
 head.o:	head.s
 	$(AS) -o $@ $<

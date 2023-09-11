@@ -32,8 +32,10 @@ system.bin: system.o
 
 # 整个磁盘文件
 disk.img: system.bin boot/bootsect.bin boot/setup.bin
+	qemu-img create -f raw disk.img 1440K
 	python3 ./combine.py
-
+	dd if=tmp.img of=disk.img conv=notrunc
+	rm -f tmp.img
 
 boot/head.o:
 	(cd boot; make head.o)
@@ -53,10 +55,8 @@ run: disk.img
 
 .PHONY: gdb-server
 gdb-server: disk.img
-# qemu-img create -f raw disk.img 1.44M
-# dd if=bootsector.bin of=disk.img bs=512 count=1 conv=notrunc
 	qemu-system-i386 -m 16m -boot a -fda disk.img -S -s
 
 .PHONY: gdb-client
-gdb-client: disk-img system.o
+gdb-client: disk.img system.o
 	gdb   -ex 'set arch i80386' -ex 'target remote localhost:1234' -ex 'file system.o'

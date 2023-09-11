@@ -35,6 +35,7 @@ ENDSEG   equ SYSSEG + SYSSIZE		; where to stop loading
 ROOT_DEV equ 0x306
 [section .s16]
 [BITS 16]
+section .text
 _start:
 	mov	ax,BOOTSEG
 	mov	ds,ax
