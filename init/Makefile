@@ -13,4 +13,4 @@ to_compile.o: to_compile.c
 
 .PHONY: clean
 clean:
-	rm -f main.o to_compile.o
+	rm -f *.o

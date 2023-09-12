@@ -19,10 +19,10 @@ boot/bootsect.bin:
 boot/setup.bin:
 	(cd boot; make setup.bin)
 
-init/to_compile.o:
-	(cd init; make to_compile.o)
 
-system.o: boot/head.o init/main.o init/to_compile.o
+system.o: 	init/to_compile.o \
+			boot/head.o init/main.o mm/memory.o \
+			kernel/kernel.o 
 	ld $(LDFLAGS) -r -o $@ $^
 
 # 后续磁盘块
@@ -36,11 +36,22 @@ disk.img: system.bin boot/bootsect.bin boot/setup.bin
 	dd if=tmp.img of=disk.img conv=notrunc
 	rm -f tmp.img
 
+init/to_compile.o:
+	(cd init; make to_compile.o)
+
 boot/head.o:
 	(cd boot; make head.o)
 
 init/main.o:
 	(cd init; make main.o)
+
+mm/memory.o:
+	(cd mm; make memory.o)
+
+kernel/kernel.o:
+	(cd kernel; make kernel.o)
+
+
 
 .PHONY: run
 run: disk.img
@@ -68,6 +79,8 @@ build-dev-env:
 
 .PHONY: clean
 clean:
-	rm -f system.map system.o system.bin disk.img bochs.log bochsdbg.log system.sym
+	rm -f *.o system.bin disk.img bochs.log bochsdbg.log system.sym
 	(cd boot; make clean;)
 	(cd init; make clean;)
+	(cd mm; make clean;)
+	(cd kernel; make clean;)
