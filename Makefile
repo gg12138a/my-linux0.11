@@ -1,13 +1,12 @@
-AS86	=as86 -0 -a		# 输出16位目标文件，并输出调试信息
-LD86	=ld86 -0
+AS 		=/usr/bin/as
+LD		=/usr/bin/ld
 
-AS 		=as --32 -march=i386+387 -mtune=i386 -nostdlib
-LD		=ld
-
-LDFLAGS	=-s -x -M -m elf_i386 -nostdlib
-CFLAGS	=-c -O2 -m32 -march=i386 -mtune=i386 \
-	-nostdinc -nostdlib -nostartfiles -nodefaultlibs \
-	-ffreestanding -fno-stack-protector -fno-exceptions
+ASFLAGS =--32 -march=i386+387 -mtune=i386 -nostdlib
+LDFLAGS	=-s -x -M -m elf_i386 -nostdlib -O2
+CFLAGS	=-c -O2 -fno-pic \
+	-m32 -march=i386 -mtune=i386 \
+	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
+#-fno-pic
 
 .PHONY: all
 all: disk.img
@@ -24,11 +23,11 @@ init/to_compile.o:
 	(cd init; make to_compile.o)
 
 system.o: boot/head.o init/main.o init/to_compile.o
-	$(LD) $(LDFLAGS) -r -o $@ $^
+	ld $(LDFLAGS) -r -o $@ $^
 
 # 后续磁盘块
 system.bin: system.o
-	$(LD) $(LDFLAGS) -o $@ $^ > system.map
+	ld $(LDFLAGS)  -e startup_32 -Ttext-seg=0x0 --oformat binary -o $@ $^ > system.map
 
 # 整个磁盘文件
 disk.img: system.bin boot/bootsect.bin boot/setup.bin

@@ -6,6 +6,9 @@
 ; It then loads 'setup' directly after itself (0x90200), and the system
 ; at 0x10000, using BIOS interrupts.
 
+
+; 将setup.s加载到0x90200，并跳转执行
+
 .globl begtext, begdata, begbss, endtext, enddata, endbss
 .text
 begtext:

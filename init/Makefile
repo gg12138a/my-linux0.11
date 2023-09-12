@@ -1,10 +1,8 @@
 CC=gcc
 
-CFLAGS=-c -O2 -I../include \
+CFLAGS=-c -O2 -fno-pic -I../include \
 	-m32 -march=i386 -mtune=i386 \
-	-nostdinc -nostdlib -nostartfiles -nodefaultlibs \
-	-ffreestanding -fno-stack-protector -fno-exceptions
-
+	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
 INCLUDE_DIRS=-I../include
 
 main.o: main.c

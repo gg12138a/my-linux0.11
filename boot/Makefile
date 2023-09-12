@@ -9,14 +9,17 @@ bootsect.o: bootsect.asm
 setup.o: setup.asm
 	nasm -o $@ -g -f elf32 -F stabs $<
 
+head.o:	head.s
+	$(AS) -o $@ $<
+
 bootsect.bin: bootsect.asm
 	nasm -o $@ $<
 
 setup.bin: setup.asm
 	nasm -o $@ $<
 
-head.o:	head.s
-	$(AS) -o $@ $<
+head.bin: head.o
+
 
 .PHONY: clean
 clean:
@@ -33,3 +36,6 @@ bootsect.disasm: bootsect.bin
 
 setup.disasm: setup.bin
 	ndisasm -b 16 $< > $@
+
+head.disasm: head.o
+	objdump -d  $< > $@

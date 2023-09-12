@@ -3,6 +3,7 @@ def exit_fall():
     sys.exit(-1)
 
 def combine_files(output_file, bootsect_file, setup_file, system_file):
+    # 第0个扇区, 512B, MBR
     with open(output_file, 'wb') as output:
         # 读取bootsect.bin的内容
         with open(bootsect_file, 'rb') as bootsect:
@@ -13,8 +14,7 @@ def combine_files(output_file, bootsect_file, setup_file, system_file):
             output.write(bootsect_data)
             # print(len(bootsect_data))
 
-
-        # 在512字节处写入setup.bin的内容
+        # 在512字节处写入setup.bin的内容，占四个扇区
         with open(setup_file, 'rb') as setup:
             setup_data = setup.read()
             if len(setup_data) > 512:
@@ -27,7 +27,7 @@ def combine_files(output_file, bootsect_file, setup_file, system_file):
         # 在1024字节处写入system.bin的内容
         with open(system_file, 'rb') as system:
             system_data = system.read()
-            output.seek(1024)  # 定位到1024字节处
+            output.seek(512+512*4)
             output.write(system_data)
             # print(len(system_data))
 
