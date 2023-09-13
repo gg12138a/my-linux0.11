@@ -1,5 +1,7 @@
 #include <asm/system.h>
+#include <linux/blk.h>
 #include <linux/fs.h>
+#include <linux/tty.h>
 #include <memory.h>
 #include <trap.h>
 
@@ -65,12 +67,13 @@ void load_system_config() {
     main_memory_start = buffer_memory_end; // 主内存起始位置=缓冲区末端；
 }
 
-
-//__attribute__((section(".text")))
 void _main(void) {
     load_system_config();
     mem_init(main_memory_start, memory_end);
     trap_init();
+    blk_dev_init();
+    chr_dev_init();
+    tty_init();
 
     sti();
 }

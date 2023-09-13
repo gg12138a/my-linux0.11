@@ -37,6 +37,9 @@ combine_files(output_img_name, "boot/bootsect.bin", "boot/setup.bin", "system.bi
 
 import os
 file_size = os.path.getsize(output_img_name)
-if file_size >= 1440*1024 :
+if file_size >= 1<<20:
     print("total disk file", "has wrong size:", file_size)
     exit_fall()
+
+
+print("system.bin size: ", file_size / (1<<20), "MB")

@@ -9,7 +9,6 @@ LDFLAGS	=-s -x -m elf_i386 -nostdlib -O1
 CFLAGS	=-c -O1 -finline-functions -nostartfiles -fno-pie \
 	-m32 -march=i386 -mtune=i386 \
 	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
-#-fno-pic
 
 .PHONY: all
 all: disk.img
@@ -77,20 +76,24 @@ bochs-run: disk.img system.sym
 # bochs-2.7
 	bochs -f bochsrc.bxrc -q
 
+system.o.disasm: system.o
+	objdump -d  $< > $@
+
+system.bin.disasm: system.bin
+	objdump -m i386  -b binary $^ -EL -D > $@
+
+
 build-dev-env:
 	pacman -S bin86
 	paru -S nasm
 
 .PHONY: clean
 clean:
-	rm -f *.o system.bin disk.img bochs.log bochsdbg.log system.sym
+	rm -f *.o system.bin disk.img \
+ 		bochs.log bochsdbg.log bx_enh_dbg.ini system.sym
+
 	(cd boot; make clean;)
 	(cd init; make clean;)
 	(cd mm; make clean;)
 	(cd kernel; make clean;)
 
-system.o.disasm: system.o
-	objdump -d  $< > $@
-
-system.bin.disasm: system.bin
-	objdump -m i386  -b binary $^ -EL -D > $@

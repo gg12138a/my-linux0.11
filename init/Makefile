@@ -1,7 +1,7 @@
 CC=gcc
 
 CFLAGS=-c -O1 -finline-functions \
-  	-fno-omit-frame-pointer -nostartfiles -fno-pie -fno-stack-protector -fno-section-anchors  \
+  	-fno-omit-frame-pointer -nostartfiles -fno-pie -fno-stack-protector   \
 	-m32 -march=i386 -mtune=i386 -fno-asynchronous-unwind-tables  \
 	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
 

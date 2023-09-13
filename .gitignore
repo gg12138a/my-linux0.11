@@ -1,0 +1,10 @@
+**/*.o
+**/*.disasm
+
+# clangd
+.cache/
+compile_commands.json
+
+.idea/
+
+.gdb_history
