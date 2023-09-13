@@ -12,7 +12,7 @@ def combine_files(output_file, bootsect_file, setup_file, system_file):
                 print(bootsect_file, "has wrong size:", len(bootsect_data))
                 exit_fall()
             output.write(bootsect_data)
-            print(len(bootsect_data))
+            # print(len(bootsect_data))
 
         # 在512字节处写入setup.bin的内容，占四个扇区
         with open(setup_file, 'rb') as setup:
@@ -22,14 +22,14 @@ def combine_files(output_file, bootsect_file, setup_file, system_file):
                 exit_fall()
             output.seek(512)  # 定位到512字节处
             output.write(setup_data)
-            print(len(setup_data))
+            # print(len(setup_data))
 
         # 在1024字节处写入system.bin的内容
         with open(system_file, 'rb') as system:
             system_data = system.read()
             output.seek(512+512*4)
             output.write(system_data)
-            print(len(system_data))
+            # print(len(system_data))
 
 
 output_img_name = "tmp.img"
@@ -37,6 +37,6 @@ combine_files(output_img_name, "boot/bootsect.bin", "boot/setup.bin", "system.bi
 
 import os
 file_size = os.path.getsize(output_img_name)
-if file_size >=1440*1024 :
+if file_size >= 1440*1024 :
     print("total disk file", "has wrong size:", file_size)
     exit_fall()

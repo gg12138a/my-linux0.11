@@ -2,7 +2,10 @@ AS 		=/usr/bin/as
 LD		=/usr/bin/ld
 
 ASFLAGS =--32 -march=i386+387 -mtune=i386 -nostdlib
-LDFLAGS	=-s -x -M -m elf_i386 -nostdlib -O1
+
+# -M 生成链接映射文件（Linker Map File）
+# --print-output-format
+LDFLAGS	=-s -x -m elf_i386 -nostdlib -O1
 CFLAGS	=-c -O1 -finline-functions -nostartfiles -fno-pie \
 	-m32 -march=i386 -mtune=i386 \
 	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
@@ -22,8 +25,8 @@ boot/setup.bin:
 
 system.o: 	init/to_compile.o \
 			boot/head.o init/main.o mm/memory.o \
-			kernel/kernel.o 
-	ld $(LDFLAGS) -Tlinker.ld -m elf_i386 -nostdlib --print-output-format -r -o $@ $^
+			kernel/kernel.o
+	ld $(LDFLAGS) -Tlinker.ld -m elf_i386 -nostdlib  -r -o $@ $^
 
 # 后续磁盘块
 system.bin: system.o

@@ -19,7 +19,7 @@ setup.bin: setup.asm
 	nasm -o $@ $<
 
 head.o.bin: head.o
-	ld -Ttext 0x0  -e startup_32 -m elf_i386  -nostdlib --print-output-format  --oformat binary -o $@ $<
+	ld -Ttext 0x0 -e startup_32 -m elf_i386 -nostdlib --oformat binary -o $@ $<
 
 
 .PHONY: disasm

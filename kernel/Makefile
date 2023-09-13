@@ -1,4 +1,4 @@
-LDFLAGS	=-s -x -M -m elf_i386 -nostdlib -O1
+LDFLAGS	=-s -x -m elf_i386 -nostdlib -O1
 CFLAGS=-c -O1 -finline-functions \
   	-fno-omit-frame-pointer -nostartfiles -fno-pie -fno-stack-protector -fno-section-anchors  \
 	-m32 -march=i386 -mtune=i386 -fno-asynchronous-unwind-tables  \

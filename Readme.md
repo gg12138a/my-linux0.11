@@ -11,3 +11,4 @@
 
   > 反汇编得到system.bin.disasm，和head.o.disasm进行比较 
   
+- 多个.o文件链接为一个.o文件，可以参见kernel/Makefile中的例子
