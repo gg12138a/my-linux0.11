@@ -18,29 +18,26 @@ bootsect.bin: bootsect.asm
 setup.bin: setup.asm
 	nasm -o $@ $<
 
-head.bin: head.o
+head.o.bin: head.o
 	ld -Ttext 0x0  -e startup_32 -m elf_i386  -nostdlib --print-output-format  --oformat binary -o $@ $<
 
 
 .PHONY: disasm
-disasm: bootsect.disasm	setup.disasm head.disasm head.bin.disasm
+disasm: bootsect.bin.disasm	setup.bin.disasm head.o.disasm head.bin.disasm
 
-bootsect.disasm: bootsect.bin
+bootsect.bin.disasm: bootsect.bin
 	ndisasm -b 16 $< > $@
 
-setup.disasm: setup.bin
+setup.bin.disasm: setup.bin
 	ndisasm -b 16 $< > $@
 
-head.disasm: head.o
+head.o.disasm: head.o
 	objdump -d  $< > $@
 
-head.bin.disasm: head.bin
+head.bin.disasm: head.o.bin
 	objdump -m i386  -b binary $^ -EL -D > $@
 
 
 .PHONY: clean
 clean:
-	rm -f \
- 		bootsect.bin setup.bin head.bin\
- 		bootsect.o setup.o head.o \
-		bootsect.disasm	setup.disasm head.disasm head.bin.disasm
+	rm -f *.bin *.o *.disasm

@@ -16,6 +16,7 @@ to_compile.o: to_compile.c
 main.o.disasm: main.o
 	objdump -d  $< > $@
 
+.PHONY: show-elf-info
 show-elf-info: main.o to_compile.o
 	objdump -x main.o
 	objdump -x to_compile.o

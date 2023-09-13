@@ -23,16 +23,11 @@ boot/setup.bin:
 system.o: 	init/to_compile.o \
 			boot/head.o init/main.o mm/memory.o \
 			kernel/kernel.o 
-	ld $(LDFLAGS)  -Tlinker.ld -m elf_i386  -nostdlib --print-output-format -r -o $@ $^
-#objcopy --remove-section=.comment --remove-section=.note.GNU-stack  --remove-section=.note.gnu.property $@
+	ld $(LDFLAGS) -Tlinker.ld -m elf_i386 -nostdlib --print-output-format -r -o $@ $^
 
 # 后续磁盘块
 system.bin: system.o
-# 用ld命令，使用system.o生成一个system.o2文件。区别于system.bin,他没有--oformat binary参数.
-# 用objcopy拆掉附加信息： objcopy system.o2 --strip-all -O binary system.bin2
-	#ld $(LDFLAGS)  -e startup_32 -Ttext-seg=0x0 --oformat binary -o $@ $^
-	#objcopy --remove-section .note.gnu.property system.o
-	ld  -Tlinker.ld -m elf_i386  -nostdlib --print-output-format  --oformat binary -o $@ $<
+	ld  -Tlinker.ld -m elf_i386 -nostdlib --print-output-format --oformat binary -o $@ $<
 
 
 # 整个磁盘文件
