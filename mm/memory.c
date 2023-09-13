@@ -16,6 +16,14 @@ static unsigned long HIGH_MEMORY = 0;
 static unsigned char mem_map[PAGING_PAGES] = {0};
 
 void mem_init(long main_start_addr, long end_addr) {
+    // for debug purpose, b 0xD060
+//    __asm__ volatile(
+//            "movl %0, %%ebx"
+//            :
+//            : "r" (&mem_map)
+//            : "%ebx"
+//    );
+
     HIGH_MEMORY = end_addr;
 
     // 首先置所有页面为已占用(USED=100)状态

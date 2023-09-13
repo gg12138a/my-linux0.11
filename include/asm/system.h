@@ -30,17 +30,17 @@ enum IDT_SEG_TYPE : unsigned short {
     /**
      * 任务门
      */
-    INTERRUPT_GATE,
+    IASK_GATE,
 
     /**
      * 中断门
      */
-    TRAP_GATE = 14,
+    INTERRUPT_GATE = 14,
 
     /**
      * 陷阱门
      */
-    TASK_GATE = 15
+    TRAP_GATE = 15
 };
 
 /**
@@ -72,7 +72,7 @@ inline void _set_gate(unsigned long *gate_addr, enum IDT_SEG_TYPE type,
  * @param addr 中断程序偏移地址
  */
 #define set_intr_gate(n, addr)                                                 \
-    _set_gate((unsigned long *)(&(idt[n])), TRAP_GATE, RING0,                  \
+    _set_gate((unsigned long *)(&(idt[n])), INTERRUPT_GATE, RING0,             \
               (unsigned long)addr)
 
 /**
@@ -81,7 +81,7 @@ inline void _set_gate(unsigned long *gate_addr, enum IDT_SEG_TYPE type,
  * @p addr 中断处理程序相对于segment selector偏移地址
  */
 #define set_trap_gate(n, addr)                                                 \
-    _set_gate((unsigned long *)(&(idt[n])), TASK_GATE, RING0,                  \
+    _set_gate((unsigned long *)(&(idt[n])), TRAP_GATE, RING0,                  \
               (unsigned long)addr)
 
 /**
@@ -90,7 +90,7 @@ inline void _set_gate(unsigned long *gate_addr, enum IDT_SEG_TYPE type,
  * @p addr 中断处理程序相对于segment selector偏移地址
  */
 #define set_system_gate(n, addr)                                               \
-    _set_gate((unsigned long *)(&(idt[n])), TASK_GATE, RING3,                  \
+    _set_gate((unsigned long *)(&(idt[n])), TRAP_GATE, RING3,                  \
               (unsigned long)addr)
 
 #endif

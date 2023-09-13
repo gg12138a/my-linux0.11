@@ -5,10 +5,11 @@
   bear -- make
   ```
 
+# Q&A
 
-# Fix
-- disk.img现在能正确的将system.bin放入第五个扇区中.
+- how to check the address of symbol `_main`is correct?
+
+  > 反汇编得到system.bin.disasm，和head.o.disasm进行比较 
 
 # TODO
-
-- system.bin生成有问题
+- 优化Makefile,减少不必要的流程和控制台输出

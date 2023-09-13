@@ -1,9 +1,13 @@
-CFLAGS=-c -O2 -fno-pic -I../include/ \
-	-m32 -march=i386 -mtune=i386 \
+CFLAGS=-c -O1 -finline-functions \
+  	-fno-omit-frame-pointer -nostartfiles -fno-pie -fno-stack-protector -fno-section-anchors  \
+	-m32 -march=i386 -mtune=i386 -fno-asynchronous-unwind-tables  \
 	-fno-builtin -ffreestanding -nostdlib -nostdinc -nodefaultlibs -nostartfiles
 
+INCLUDE_DIRS=-I../include/
+
 memory.o: memory.c
-	gcc $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) ${INCLUDE_DIRS} -o $@ $<
+
 
 .PHONY: clean
 clean:

@@ -10,7 +10,7 @@ setup.o: setup.asm
 	nasm -o $@ -g -f elf32 -F stabs $<
 
 head.o:	head.s
-	$(AS) -o $@ $<
+	$(AS)  --generate-missing-build-notes=no -o $@ $<
 
 bootsect.bin: bootsect.asm
 	nasm -o $@ $<
@@ -19,17 +19,11 @@ setup.bin: setup.asm
 	nasm -o $@ $<
 
 head.bin: head.o
+	ld -Ttext 0x0  -e startup_32 -m elf_i386  -nostdlib --print-output-format  --oformat binary -o $@ $<
 
-
-.PHONY: clean
-clean:
-	rm -f \
- 		bootsect.bin setup.bin \
- 		bootsect.o setup.o head.o \
-		bootsect.disasm setup.disasm
 
 .PHONY: disasm
-disasm: bootsect.disasm	setup.disasm
+disasm: bootsect.disasm	setup.disasm head.disasm head.bin.disasm
 
 bootsect.disasm: bootsect.bin
 	ndisasm -b 16 $< > $@
@@ -39,3 +33,14 @@ setup.disasm: setup.bin
 
 head.disasm: head.o
 	objdump -d  $< > $@
+
+head.bin.disasm: head.bin
+	objdump -m i386  -b binary $^ -EL -D > $@
+
+
+.PHONY: clean
+clean:
+	rm -f \
+ 		bootsect.bin setup.bin head.bin\
+ 		bootsect.o setup.o head.o \
+		bootsect.disasm	setup.disasm head.disasm head.bin.disasm

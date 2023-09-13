@@ -178,6 +178,7 @@ end_move:
 ; we let the gnu-compiled 32-bit programs do that. We just jump to
 ; absolute address 0x00000, in 32-bit protected mode.
 
+# 进入保护模式，同时分段的寻址方式改变
 	mov	ax,#0x0001	; protected mode (PE) bit
 	lmsw	ax		; This is it;
 	; 等同jmp 8:0, 即cs=8,此处cs为段选择子

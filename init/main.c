@@ -65,10 +65,9 @@ void load_system_config() {
     main_memory_start = buffer_memory_end; // 主内存起始位置=缓冲区末端；
 }
 
-/**
- * @note 在jmp到main符号前,
- */
-void main(void) {
+
+//__attribute__((section(".text")))
+void _main(void) {
     load_system_config();
     mem_init(main_memory_start, memory_end);
     trap_init();

@@ -11,8 +11,13 @@
  * the page directory will exist. The startup code will be overwritten by
  * the page directory.
  */
-.text
 .globl _idt,_gdt,_pg_dir,_tmp_floppy_area,startup_32
+
+# 用来生成system.sym中的符号地址
+.globl _setup_idt,_setup_gdt,_check_x87,_rp_sidt,_after_page_tables,_setup_paging,_ignore_int
+.extern _stack_start,_main,_printk
+
+.section .text.startup_32
 _pg_dir:
 startup_32:
 	movl $0x10,%eax
@@ -22,11 +27,11 @@ startup_32:
 	mov %ax,%gs
 	lss _stack_start,%esp	# 在_stack_start处读6B;
 							#之后cs=0x10, esp=sched.c中的user_stack数组的最高元素的地址
-	call setup_idt
-	call setup_gdt
+	call _setup_idt
+	call _setup_gdt
 	movl $0x10,%eax		# reload all the segment registers
 	mov %ax,%ds		# after changing gdt. CS was already
-	mov %ax,%es		# reloaded in 'setup_gdt'
+	mov %ax,%es		# reloaded in '_setup_gdt'
 	mov %ax,%fs
 	mov %ax,%gs
 	lss _stack_start,%esp
@@ -63,13 +68,13 @@ l1:
 	/* "orl $0x10020,%eax" here for 486 might be good */
 	orl $2,%eax		# set MP
 	movl %eax,%cr0
-	call check_x87
-	jmp after_page_tables
+	call _check_x87
+	jmp _after_page_tables
 
 /*
  * We depend on ET to be correct. This checks for 287/387.
  */
-check_x87:
+_check_x87:
 	fninit
 	fstsw %ax
 	cmpb $0,%al
@@ -84,10 +89,10 @@ l2:
 	ret
 
 /*
- *  setup_idt
+ *  _setup_idt
  *
  *  sets up a idt with 256 entries pointing to
- *  ignore_int, interrupt gates. It then loads
+ *  _ignore_int, interrupt gates. It then loads
  *  idt. Everything that wants to install itself
  *  in the idt-table may do so themselves. Interrupts
  *  are enabled elsewhere, when we can be relatively
@@ -96,29 +101,29 @@ l2:
  */
 
 /*
- * 设置256个中断描述符,并都指向ignore_int中断门.
+ * 设置256个中断描述符,并都指向_ignore_int中断门.
  * 即每一个中断描述符,都有着相同的段选择子0x0008,相同的段内偏移地址ingore_int.
  */
-setup_idt:
-	lea ignore_int,%edx		# edx寄存器中,存的是ignore_int标号对应的地址
+_setup_idt:
+	lea _ignore_int,%edx		# edx寄存器中,存的是_ignore_int标号对应的地址
 	movl $0x00080000,%eax
-	movw %dx,%ax		# eax的高16位=0x0008(段选择子), 低16位=ignore_int.
+	movw %dx,%ax		# eax的高16位=0x0008(段选择子), 低16位=_ignore_int.
 						# 即eax此时是中断描述符的其中32位.
 	movw $0x8E00,%dx	/* interrupt gate - dpl=0, present */
 						# 即此时edx是中断描述符的另32位.
 	lea _idt,%edi
 	mov $256,%ecx
-rp_sidt:
+_rp_sidt:
 	movl %eax,(%edi)	# 将eax指向的值,复制到edi指向的内存地址
 	movl %edx,4(%edi)	# 将edx指向的值,复制到edi+4指向的内存地址
 	addl $8,%edi
 	dec %ecx
-	jne rp_sidt
+	jne _rp_sidt
 	lidt idt_descr
 	ret
 
 /*
- *  setup_gdt
+ *  _setup_gdt
  *
  *  This routines sets up a new gdt and loads it.
  *  Only two entries are currently built, the same
@@ -127,7 +132,7 @@ rp_sidt:
  *  rather long comment is certainly needed :-).
  *  This routine will beoverwritten by the page tables.
  */
-setup_gdt:
+_setup_gdt:
 	lgdt gdt_descr
 	ret
 
@@ -157,13 +162,13 @@ pg3:
 _tmp_floppy_area:
 	.fill 1024,1,0
 
-after_page_tables:
+_after_page_tables:
 	pushl $0		# These are the parameters to main :-)
 	pushl $0
 	pushl $0
 	pushl $L6		# return address for main, if it decides to.
 	pushl $_main
-	jmp setup_paging
+	jmp _setup_paging
 L6:
 	jmp L6			# main should never return here, but
 				# just in case, we know what happens.
@@ -172,7 +177,7 @@ L6:
 int_msg:
 	.asciz "Unknown interrupt\n\r"
 .p2align 2
-ignore_int:
+_ignore_int:
 	pushl %eax
 	pushl %ecx
 	pushl %edx
@@ -196,7 +201,7 @@ ignore_int:
 
 
 /*
- * Setup_paging
+ * _setup_paging
  *
  * This routine sets up paging by setting the page bit
  * in cr0. The page tables are set up, identity-mapping
@@ -220,7 +225,7 @@ ignore_int:
  * won't guarantee that's all :-( )
  */
 .p2align 2
-setup_paging:
+_setup_paging:
 	# 清空5个4K页(1个页目录表+4个页表页)
 	movl $1024*5,%ecx		/* 5 pages - pg_dir+4 page tables */
 	xorl %eax,%eax
@@ -228,7 +233,9 @@ setup_paging:
 	# 设置方向标志位std, stosl指令会递减edi
 	# 清除方向标志位cld, stosl指令会递增edi
 	# 将32个位,从%eax保存的值,复制到%edi指向的地址。并增加edi
-	cld;rep;stosl
+	cld
+	rep
+	stosl
 
 	# 设置页目录表的4个页表项
 	movl $pg0+7,_pg_dir		/* set present bit/user r/w */
